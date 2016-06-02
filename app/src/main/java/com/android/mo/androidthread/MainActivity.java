@@ -1,7 +1,15 @@
 package com.android.mo.androidthread;
 
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -10,17 +18,64 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.net.MalformedURLException;
+import com.android.mo.config.Constants;
+import com.android.mo.service.MessengerService;
+
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private TextView mTextView;
 
+
+    private static class MessengerHandler extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case Constants.MSG_FORM_SERVICE:
+                    Log.e(TAG, "receive reply form service :" + msg.getData().getString("reply"));
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    private final Messenger mGetReplyMessenger = new Messenger(new MessengerHandler());
+
+
+    private Messenger mService;
+
+    private boolean isServiceConnection = false;
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mService = new Messenger(service);
+            Message message = Message.obtain(null, Constants.MSG_FORM_CLIENT);
+            Bundle bundle = new Bundle();
+            bundle.putString("msg", "hello word");
+            message.setData(bundle);
+            message.replyTo = mGetReplyMessenger;
+            try {
+                mService.send(message);
+                isServiceConnection = true;
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,54 +95,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        MeExecutor.doNetIOGet(1, "http://feng-home.iteye.com/blog/657089", new MeCallback() {
-            @Override
-            public void onSuccess(int tag, String entity) {
-                Log.e("TAG","tag1");
-                mTextView.setText(1 + "");
-            }
+//        MeExecutor.doNetIOGet(1, "http://feng-home.iteye.com/blog/657089", new MeCallback() {
+//            @Override
+//            public void onSuccess(int tag, String entity) {
+//                Log.e("TAG","tag1");
+//                mTextView.setText(1 + "");
+//            }
 
-            @Override
-            public void onFailure(int tag, String msg, int code) {
+        Intent intent = new Intent(this, MessengerService.class);
+        bindService(intent, mConnection, BIND_AUTO_CREATE);
+    }
 
-            }
-        });
-        MeExecutor.doNetIOGet(2, "http://feng-home.iteye.com/blog/657089", new MeCallback() {
-            @Override
-            public void onSuccess(int tag, String entity) {
-                Log.e("TAG","tag2");
-                mTextView.setText(1 + "2");
-            }
-
-            @Override
-            public void onFailure(int tag, String msg, int code) {
-
-            }
-        });
-        MeExecutor.doNetIOGet(3, "http://feng-home.iteye.com/blog/657089", new MeCallback() {
-            @Override
-            public void onSuccess(int tag, String entity) {
-                Log.e("TAG","tag3");
-                mTextView.setText(1 + "3");
-            }
-
-            @Override
-            public void onFailure(int tag, String msg, int code) {
-
-            }
-        });
-        MeExecutor.doNetIOGet(4, "http://feng-home.iteye.com/blog/657089", new MeCallback() {
-            @Override
-            public void onSuccess(int tag, String entity) {
-                Log.e("TAG","tag4");
-                mTextView.setText(1 + "4");
-            }
-
-            @Override
-            public void onFailure(int tag, String msg, int code) {
-
-            }
-        });
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (isServiceConnection) {
+            unbindService(mConnection);
+        }
     }
 
     @Override
