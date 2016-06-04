@@ -25,8 +25,6 @@ public class HScrollView extends ViewGroup {
 
     private VelocityTracker velocityTracker;
 
-    private float mLastMotionX;
-
     public HScrollView(Context context) {
         super(context);
         init(context);
@@ -57,26 +55,57 @@ public class HScrollView extends ViewGroup {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        boolean isIntercept = false;
         Log.e(TAG, "onInterceptTouchEvent");
-        return true;
+        int action = ev.getAction();
+        int x = (int) ev.getX();
+        int y = (int) ev.getY();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                isIntercept = false;
+                if (!mScroller.isFinished()) {
+                    mScroller.abortAnimation();
+                }
+                mLastInterceptX = (int) ev.getX();
+                mLastInterceptY = (int) ev.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                int deltX = mLastInterceptX - x;
+                int deltY = mLastInterceptY - y;
+                if (Math.abs(deltY) > Math.abs(deltX)) {
+                    isIntercept = false;
+                } else {
+                    isIntercept = true;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                isIntercept = false;
+                break;
+            default:
+                break;
+        }
+        return isIntercept;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
-        float x = event.getX();
+        int x = (int) event.getX();
+        Log.e(TAG, "x:" + x);
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                if(!mScroller.isFinished()){
+                if (!mScroller.isFinished()) {
                     mScroller.abortAnimation();
                 }
-                mLastMotionX = event.getX();
+                mLastX = (int) event.getX();
+                Log.e(TAG, "mLastMotionX:" + mLastX);
                 break;
             case MotionEvent.ACTION_MOVE:
-                float delt = mLastMotionX-x;
-                if(isCanMove((int)delt)){
-                    mLastMotionX = x;
-                    scrollBy((int)delt, 0);
+                int delt = mLastX - x;
+                if (isCanMove(delt)) {
+                    mLastX = x;
+                    mScroller.startScroll(mScroller.getFinalX(), 0, delt, 0);
+                    invalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -87,11 +116,11 @@ public class HScrollView extends ViewGroup {
         return true;
     }
 
-    private boolean isCanMove(int delat){
+    private boolean isCanMove(int delat) {
         /*if(getScrollX()<0 && delat<0){
             return false;
         }*/
-        if(getScrollX()>=(getChildCount()-1)*getWidth() && delat>0){
+        if (getScrollX() >= (getChildCount() - 1) * getWidth() && delat > 0) {
             return false;
         }
         return true;
@@ -100,7 +129,7 @@ public class HScrollView extends ViewGroup {
 
     @Override
     public void computeScroll() {
-        if(mScroller.computeScrollOffset()){
+        if (mScroller.computeScrollOffset()) {
             scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
             postInvalidate();
         }

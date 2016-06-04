@@ -152,8 +152,17 @@ public class DemoView extends View {
     protected void onDraw(final Canvas canvas) {
         Log.e(TAG, "onDraw");
         super.onDraw(canvas);
-        canvas.drawLine(0, 0, getMeasuredWidth(), getMeasuredHeight(), mPaint);
 
+        int paddingLeft = getPaddingLeft();
+        int paddingRight = getPaddingRight();
+        int paddingTop = getPaddingTop();
+        int paddingBottom = getPaddingBottom();
+        int width = getWidth() - paddingLeft - paddingRight;
+        int height = getHeight() - paddingTop - paddingBottom;
+        int radius = Math.min(width, height) / 2;
+        canvas.drawCircle(paddingLeft + width / 2, paddingTop + height / 2, radius, mPaint);
+        
+        canvas.drawLine(0, 0, getMeasuredWidth(), getMeasuredHeight(), mPaint);
         canvas.drawLine(0, getMeasuredHeight(), getMeasuredWidth(), 0, mPaint);
 
 

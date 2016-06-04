@@ -22,10 +22,12 @@
             android:id="@+id/demoview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#33999999" />
+            android:background="#33999999"
+            android:padding="10dp" />
 
         <com.android.mo.view.DemoView
             android:layout_width="wrap_content"
+            android:padding="5dp"
             android:layout_height="wrap_content"
             android:background="#33999999" />
     </com.android.mo.view.HScrollView>
