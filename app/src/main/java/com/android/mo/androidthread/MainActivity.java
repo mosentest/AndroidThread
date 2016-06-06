@@ -11,21 +11,17 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
-import android.widget.TextView;
+import android.view.animation.AnimationUtils;
 
 import com.android.mo.config.Constants;
-import com.android.mo.service.MessengerService;
 import com.android.mo.view.DemoView;
-import com.nineoldandroids.animation.ObjectAnimator;
 
 import java.net.URL;
 
@@ -113,12 +109,17 @@ public class MainActivity extends AppCompatActivity {
 
 
         mDemoview = (DemoView) findViewById(R.id.demoview);
+
+
+
     }
 
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.demo1);
+        mDemoview.startAnimation(animation);
 //        ObjectAnimator.ofFloat(mDemoview, "translationX", 0, 100).setDuration(1000).start();
 //        ObjectAnimator.ofFloat(mDemoview, "translationY", 0, 100).setDuration(1000).start();
     }

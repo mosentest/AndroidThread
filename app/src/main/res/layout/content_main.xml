@@ -27,12 +27,26 @@
 
         <com.android.mo.view.DemoView
             android:layout_width="wrap_content"
-            android:padding="5dp"
             android:layout_height="wrap_content"
-            android:background="#33999999" />
+            android:background="#33999999"
+            android:padding="5dp" />
     </com.android.mo.view.HScrollView>
 
 
+    <ImageView
+
+        android:id="@+id/iv"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/drawable_bitmap" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/drawable_layer_list"
+        android:padding="10dp" />
     <!--</ScrollView>-->
+
 
 </LinearLayout>
